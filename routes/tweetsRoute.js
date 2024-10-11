@@ -9,13 +9,25 @@ const { checkBody } = require('../modules/checkBody');
 
 /* GET liste des Tweets */
 router.get('/', (req, res) => {
-	Tweet.find().then(data => {
+	Tweet.find()
+    .populate('user')
+    .then(data => {
+        console.log("route GET tweets");
 		res.json({ tweets: data });
 	});
 });
 
+/* GET contenu d'un Tweet */
+router.get('/:idTweet', (req, res) => {
+	Tweet.findOne( {_id: req.params.idTweet} )
+    .populate('user')
+    .then(data => {
+		res.json( data );
+	});
+});
+
 /* POST créer un nouveau Tweet */
-router.post('/newTweet', (req, res) => {
+router.post('/:idUser', (req, res) => {
 
     // On verifie si le champ est rempli
     if (!checkBody(req.body, ['message'])) {
@@ -41,6 +53,7 @@ router.post('/newTweet', (req, res) => {
                 const newTweet = new Tweet({
                     message: req.body.message,
                     trend: data._id,
+                    user: req.params.idUser,
                 });
             
                 newTweet.save().then(newDoc => {
@@ -67,6 +80,7 @@ router.post('/newTweet', (req, res) => {
                 const newTweet = new Tweet({
                     message: req.body.message,
                     trend: idNewTrend,
+                    user: req.params.idUser,
                 });
             
                 newTweet.save().then(newDoc => {
